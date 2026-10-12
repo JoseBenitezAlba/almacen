@@ -3,46 +3,48 @@
 @section('title', 'Registrar movimiento')
 
 @section('content')
-    <hgroup>
-        <h1>Registrar movimiento</h1>
-        <p>
-            {{ $product->name }} ({{ $product->code }}) ·
-            Stock actual: {{ $product->stock }} {{ $product->unit }}
-        </p>
-    </hgroup>
+    <div class="page-head">
+        <div>
+            <h1>Registrar movimiento</h1>
+            <p>{{ $product->name }} · {{ $product->code }}</p>
+        </div>
+        <div>
+            @include('partials.stock-badge', ['product' => $product])
+        </div>
+    </div>
 
-    @if ($errors->any())
-        <article>
-            <ul>
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </article>
-    @endif
+    <div class="card">
+        <div class="card-body">
+            @include('partials.errors')
 
-    <form method="POST" action="{{ route('movements.store', $product) }}">
-        @csrf
+            <form method="POST" action="{{ route('movements.store', $product) }}">
+                @csrf
 
-        <label>
-            Tipo
-            <select name="type" required>
-                <option value="in" @selected(old('type') === 'in')>Entrada</option>
-                <option value="out" @selected(old('type') === 'out')>Salida</option>
-            </select>
-        </label>
+                <div class="form-grid">
+                    <div class="field">
+                        <label for="type">Tipo</label>
+                        <select id="type" name="type" required>
+                            <option value="in" @selected(old('type') === 'in')>Entrada</option>
+                            <option value="out" @selected(old('type') === 'out')>Salida</option>
+                        </select>
+                    </div>
 
-        <label>
-            Cantidad ({{ $product->unit }})
-            <input type="number" name="quantity" min="1" value="{{ old('quantity') }}" required>
-        </label>
+                    <div class="field">
+                        <label for="quantity">Cantidad ({{ $product->unit }})</label>
+                        <input id="quantity" type="number" name="quantity" min="1" value="{{ old('quantity') }}" required>
+                    </div>
+                </div>
 
-        <label>
-            Motivo
-            <input type="text" name="reason" value="{{ old('reason') }}" placeholder="Compra, venta, ajuste de inventario...">
-        </label>
+                <div class="field">
+                    <label for="reason">Motivo</label>
+                    <input id="reason" type="text" name="reason" value="{{ old('reason') }}" placeholder="Compra, ajuste de inventario, merma...">
+                </div>
 
-        <button type="submit">Registrar</button>
-        <a href="{{ route('products.show', $product) }}" role="button" class="secondary">Cancelar</a>
-    </form>
+                <div class="form-actions">
+                    <button type="submit" class="btn">Registrar</button>
+                    <a class="btn btn-ghost" href="{{ route('products.show', $product) }}">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
 @endsection

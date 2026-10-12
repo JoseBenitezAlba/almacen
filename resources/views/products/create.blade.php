@@ -3,14 +3,25 @@
 @section('title', 'Nuevo producto')
 
 @section('content')
-    <h1>Nuevo producto</h1>
+    <div class="page-head">
+        <div>
+            <h1>Nuevo producto</h1>
+            <p>Añade una referencia al catálogo</p>
+        </div>
+    </div>
 
-    <form method="POST" action="{{ route('products.store') }}">
-        @csrf
+    <div class="card">
+        <div class="card-body">
+            <form method="POST" action="{{ route('products.store') }}">
+                @csrf
 
-        @include('products.form')
+                @include('products.form')
 
-        <button type="submit">Guardar</button>
-        <a href="{{ route('products.index') }}" role="button" class="secondary">Cancelar</a>
-    </form>
+                <div class="form-actions">
+                    <button type="submit" class="btn">Guardar</button>
+                    <a class="btn btn-ghost" href="{{ route('products.index') }}">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
 @endsection

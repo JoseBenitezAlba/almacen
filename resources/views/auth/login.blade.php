@@ -4,45 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Iniciar sesión · Almacén</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
 </head>
 <body>
-    <main class="container" style="max-width: 440px; margin-top: 10vh;">
-        <hgroup>
-            <h1>Almacén</h1>
-            <p>Inicia sesión para continuar</p>
-        </hgroup>
+    <div class="login-page">
+        <div class="card login-card">
+            <div class="brand">
+                <span class="brand-mark">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>
+                </span>
+                Almacén
+            </div>
+            <p class="muted" style="margin-bottom: 22px;">Inicia sesión para continuar</p>
 
-        @if ($errors->any())
-            <article>
-                <ul>
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </article>
-        @endif
+            @include('partials.errors')
 
-        <form method="POST" action="{{ route('login') }}">
-            @csrf
+            <form method="POST" action="{{ route('login') }}">
+                @csrf
 
-            <label>
-                Correo electrónico
-                <input type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="email">
-            </label>
+                <div class="field">
+                    <label for="email">Correo electrónico</label>
+                    <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="email">
+                </div>
 
-            <label>
-                Contraseña
-                <input type="password" name="password" required autocomplete="current-password">
-            </label>
+                <div class="field">
+                    <label for="password">Contraseña</label>
+                    <input id="password" type="password" name="password" required autocomplete="current-password">
+                </div>
 
-            <label>
-                <input type="checkbox" name="remember" value="1">
-                Mantener la sesión iniciada
-            </label>
+                <label class="check">
+                    <input type="checkbox" name="remember" value="1">
+                    Mantener la sesión iniciada
+                </label>
 
-            <button type="submit">Entrar</button>
-        </form>
-    </main>
+                <button type="submit" class="btn" style="width: 100%;">Entrar</button>
+            </form>
+        </div>
+    </div>
 </body>
 </html>

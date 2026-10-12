@@ -3,56 +3,52 @@
 @section('title', 'Categorías')
 
 @section('content')
-    <hgroup>
-        <h1>Categorías</h1>
-        <p>Agrupa tus productos para encontrarlos antes</p>
-    </hgroup>
+    <div class="page-head">
+        <div>
+            <h1>Categorías</h1>
+            <p>Agrupa tus productos para encontrarlos antes</p>
+        </div>
+    </div>
 
-    @if ($errors->any())
-        <article class="flash flash-error">
-            <ul>
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </article>
-    @endif
+    @include('partials.errors')
 
-    <form method="POST" action="{{ route('categories.store') }}" role="group">
-        @csrf
-        <input type="text" name="name" value="{{ old('name') }}" placeholder="Nueva categoría" required>
-        <button type="submit">Añadir</button>
-    </form>
+    <div class="card">
+        <form method="POST" action="{{ route('categories.store') }}" class="toolbar">
+            @csrf
+            <input type="text" name="name" value="{{ old('name') }}" placeholder="Nueva categoría" required>
+            <button type="submit" class="btn">Añadir</button>
+        </form>
 
-    <figure>
-        <table>
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Productos</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($categories as $category)
+        <div class="table-wrap">
+            <table>
+                <thead>
                     <tr>
-                        <td>{{ $category->name }}</td>
-                        <td>{{ $category->products_count }}</td>
-                        <td>
-                            <form method="POST" action="{{ route('categories.destroy', $category) }}"
-                                  onsubmit="return confirm('¿Eliminar la categoría {{ $category->name }}?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="contrast outline" style="margin: 0; padding: .2rem .7rem;">Eliminar</button>
-                            </form>
-                        </td>
+                        <th>Nombre</th>
+                        <th>Productos</th>
+                        <th></th>
                     </tr>
-                @empty
-                    <tr>
-                        <td colspan="3">Todavía no hay categorías. Crea la primera arriba.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </figure>
+                </thead>
+                <tbody>
+                    @forelse ($categories as $category)
+                        <tr>
+                            <td><strong>{{ $category->name }}</strong></td>
+                            <td>{{ $category->products_count }}</td>
+                            <td>
+                                <div class="row-actions">
+                                    <form method="POST" action="{{ route('categories.destroy', $category) }}" class="inline-form"
+                                          onsubmit="return confirm('¿Eliminar la categoría {{ $category->name }}?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="3" class="empty">Todavía no hay categorías. Crea la primera arriba.</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
 @endsection
