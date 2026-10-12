@@ -16,7 +16,8 @@
             @endif
         </p>
         <p><strong>Stock mínimo:</strong> {{ $product->min_stock }}</p>
-        <p><strong>Categoría:</strong> {{ $product->category ?? '—' }}</p>
+        <p><strong>Precio de venta:</strong> {{ $product->price_formatted }}</p>
+        <p><strong>Categoría:</strong> {{ $product->category?->name ?? '—' }}</p>
         <p><strong>Ubicación:</strong> {{ $product->location ?? '—' }}</p>
 
         @if ($product->description)

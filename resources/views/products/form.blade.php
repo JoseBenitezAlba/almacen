@@ -1,7 +1,7 @@
 @php($product = $product ?? null)
 
 @if ($errors->any())
-    <article>
+    <article class="flash flash-error">
         <ul>
             @foreach ($errors->all() as $error)
                 <li>{{ $error }}</li>
@@ -23,7 +23,15 @@
 <div class="grid">
     <label>
         Categoría
-        <input type="text" name="category" value="{{ old('category', $product->category ?? '') }}">
+        <select name="category_id">
+            <option value="">Sin categoría</option>
+            @foreach ($categories as $category)
+                <option value="{{ $category->id }}"
+                    @selected((string) old('category_id', $product->category_id ?? '') === (string) $category->id)>
+                    {{ $category->name }}
+                </option>
+            @endforeach
+        </select>
     </label>
 
     <label>
@@ -33,6 +41,12 @@
 </div>
 
 <div class="grid">
+    <label>
+        Precio de venta (€)
+        <input type="text" name="price" inputmode="decimal" placeholder="0,00"
+               value="{{ old('price', $product ? number_format($product->price_cents / 100, 2, ',', '') : '0,00') }}" required>
+    </label>
+
     <label>
         Unidad
         <input type="text" name="unit" value="{{ old('unit', $product->unit ?? 'ud') }}" required>

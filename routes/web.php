@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\StockMovementController;
@@ -18,6 +19,7 @@ Route::middleware('auth')->group(function () {
     // Solo administradores (se definen antes para que /products/create no choque con /products/{product})
     Route::middleware('admin')->group(function () {
         Route::resource('products', ProductController::class)->except(['index', 'show']);
+        Route::resource('categories', CategoryController::class)->only(['index', 'store', 'destroy']);
 
         Route::get('products/{product}/movements/create', [StockMovementController::class, 'create'])
             ->name('movements.create');

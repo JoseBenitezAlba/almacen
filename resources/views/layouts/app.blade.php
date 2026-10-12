@@ -10,6 +10,7 @@
         .mov-out { color: #c62828; font-weight: 600; }
         .stat    { font-size: 2.2rem; font-weight: 700; margin: 0; }
         .flash   { border-left: 4px solid #2e7d32; }
+        .flash-error { border-left-color: #c62828; }
         .logout  { margin: 0; }
         .logout button { margin: 0; padding: .3rem .8rem; }
     </style>
@@ -27,6 +28,11 @@
                 <li>
                     <a href="{{ route('products.index') }}" @if (request()->routeIs('products.*')) aria-current="page" @endif>Productos</a>
                 </li>
+                @if (auth()->user()->isAdmin())
+                    <li>
+                        <a href="{{ route('categories.index') }}" @if (request()->routeIs('categories.*')) aria-current="page" @endif>Categorías</a>
+                    </li>
+                @endif
                 <li>
                     <a href="{{ route('movements.index') }}" @if (request()->routeIs('movements.*')) aria-current="page" @endif>Movimientos</a>
                 </li>
@@ -49,7 +55,7 @@
         @endif
 
         @if (session('error'))
-            <article class="flash">{{ session('error') }}</article>
+            <article class="flash flash-error">{{ session('error') }}</article>
         @endif
 
         @yield('content')

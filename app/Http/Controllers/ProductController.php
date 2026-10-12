@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,11 +16,12 @@ class ProductController extends Controller
         $search = $request->query('q');
 
         $products = Product::query()
+            ->with('category')
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
                       ->orWhere('code', 'like', "%{$search}%")
-                      ->orWhere('category', 'like', "%{$search}%");
+                      ->orWhereHas('category', fn ($c) => $c->where('name', 'like', "%{$search}%"));
                 });
             })
             ->orderBy('name')
@@ -31,20 +33,14 @@ class ProductController extends Controller
 
     public function create(): View
     {
-        return view('products.create');
+        $categories = Category::orderBy('name')->get();
+
+        return view('products.create', compact('categories'));
     }
 
     public function store(Request $request): RedirectResponse
     {
-        $data = $request->validate([
-            'code'         => ['required', 'string', 'max:50', 'unique:products,code'],
-            'name'        => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'category'    => ['nullable', 'string', 'max:100'],
-            'location'    => ['nullable', 'string', 'max:100'],
-            'unit'        => ['required', 'string', 'max:20'],
-            'min_stock'   => ['required', 'integer', 'min:0'],
-        ]);
+        $data = $this->payload($request->validate($this->rules(), $this->messages()));
 
         Product::create($data);
 
@@ -55,6 +51,8 @@ class ProductController extends Controller
 
     public function show(Product $product): View
     {
+        $product->load('category');
+
         $movements = $product->movements()
             ->with('user')
             ->latest()
@@ -66,20 +64,14 @@ class ProductController extends Controller
 
     public function edit(Product $product): View
     {
-        return view('products.edit', compact('product'));
+        $categories = Category::orderBy('name')->get();
+
+        return view('products.edit', compact('product', 'categories'));
     }
 
     public function update(Request $request, Product $product): RedirectResponse
     {
-        $data = $request->validate([
-            'code'         => ['required', 'string', 'max:50', Rule::unique('products', 'code')->ignore($product->id)],
-            'name'        => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'category'    => ['nullable', 'string', 'max:100'],
-            'location'    => ['nullable', 'string', 'max:100'],
-            'unit'        => ['required', 'string', 'max:20'],
-            'min_stock'   => ['required', 'integer', 'min:0'],
-        ]);
+        $data = $this->payload($request->validate($this->rules($product), $this->messages()));
 
         $product->update($data);
 
@@ -102,5 +94,35 @@ class ProductController extends Controller
         return redirect()
             ->route('products.index')
             ->with('success', 'Producto eliminado.');
+    }
+
+    private function rules(?Product $product = null): array
+    {
+        return [
+            'code'        => ['required', 'string', 'max:50', Rule::unique('products', 'code')->ignore($product?->id)],
+            'name'        => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+            'category_id' => ['nullable', 'exists:categories,id'],
+            'location'    => ['nullable', 'string', 'max:100'],
+            'unit'        => ['required', 'string', 'max:20'],
+            'price'       => ['required', 'regex:/^\d{1,7}([.,]\d{1,2})?$/'],
+            'min_stock'   => ['required', 'integer', 'min:0'],
+        ];
+    }
+
+    private function messages(): array
+    {
+        return [
+            'price.regex' => 'El precio debe ser un número con hasta 2 decimales, por ejemplo 12,50.',
+        ];
+    }
+
+    // Convierte el precio en euros del formulario a céntimos
+    private function payload(array $data): array
+    {
+        $data['price_cents'] = Product::eurosToCents($data['price']);
+        unset($data['price']);
+
+        return $data;
     }
 }

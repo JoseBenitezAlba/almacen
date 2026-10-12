@@ -27,6 +27,7 @@
                     <th>Nombre</th>
                     <th>Categoría</th>
                     <th>Ubicación</th>
+                    <th>Precio</th>
                     <th>Stock</th>
                     <th></th>
                 </tr>
@@ -36,8 +37,9 @@
                     <tr>
                         <td>{{ $product->code }}</td>
                         <td><a href="{{ route('products.show', $product) }}">{{ $product->name }}</a></td>
-                        <td>{{ $product->category }}</td>
+                        <td>{{ $product->category?->name }}</td>
                         <td>{{ $product->location }}</td>
+                        <td>{{ $product->price_formatted }}</td>
                         <td>
                             {{ $product->stock }} {{ $product->unit }}
                             @if ($product->isLowStock())
@@ -54,7 +56,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6">No hay productos todavía.</td>
+                        <td colspan="7">No hay productos todavía.</td>
                     </tr>
                 @endforelse
             </tbody>
