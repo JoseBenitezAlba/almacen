@@ -4,11 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\StockMovement;
+use App\Services\StockService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class StockMovementController extends Controller
@@ -27,7 +27,7 @@ class StockMovementController extends Controller
         return view('movements.create', compact('product'));
     }
 
-    public function store(Request $request, Product $product): RedirectResponse
+    public function store(Request $request, Product $product, StockService $stock): RedirectResponse
     {
         $data = $request->validate([
             'type'     => ['required', Rule::in([StockMovement::TYPE_IN, StockMovement::TYPE_OUT])],
@@ -35,28 +35,13 @@ class StockMovementController extends Controller
             'reason'   => ['nullable', 'string', 'max:255'],
         ]);
 
-        DB::transaction(function () use ($product, $data) {
-            // Se vuelve a leer el producto dentro de la transacción para trabajar con el stock real
-            $current = Product::whereKey($product->id)->lockForUpdate()->firstOrFail();
-
-            if ($data['type'] === StockMovement::TYPE_OUT && $data['quantity'] > $current->stock) {
-                throw ValidationException::withMessages([
-                    'quantity' => "No hay stock suficiente. Stock actual: {$current->stock} {$current->unit}.",
-                ]);
-            }
-
-            $current->stock += $data['type'] === StockMovement::TYPE_IN
-                ? $data['quantity']
-                : -$data['quantity'];
-            $current->save();
-
-            $current->movements()->create([
-                'user_id'  => auth()->id(),
-                'type'     => $data['type'],
-                'quantity' => $data['quantity'],
-                'reason'   => $data['reason'] ?? null,
-            ]);
-        });
+        DB::transaction(fn () => $stock->move(
+            $product->id,
+            $data['type'],
+            (int) $data['quantity'],
+            $data['reason'] ?? null,
+            $request->user()->id
+        ));
 
         return redirect()
             ->route('products.show', $product)

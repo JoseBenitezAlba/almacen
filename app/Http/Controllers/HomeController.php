@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\Sale;
 use App\Models\StockMovement;
+use App\Support\Money;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
@@ -12,32 +14,70 @@ class HomeController extends Controller
 {
     public function __invoke(): View
     {
+        $monthStart = now()->startOfMonth();
+
+        $salesMonthTotal = Money::format((int) Sale::where('created_at', '>=', $monthStart)->sum('total_cents'));
+        $salesMonthCount = Sale::where('created_at', '>=', $monthStart)->count();
+
         $totalProducts = Product::count();
-        $inventoryValue = $this->money((int) Product::sum(DB::raw('stock * price_cents')));
+        $inventoryValue = Money::format((int) Product::sum(DB::raw('stock * price_cents')));
         $movementsToday = StockMovement::whereDate('created_at', today())->count();
 
         $lowStockProducts = Product::whereColumn('stock', '<=', 'min_stock')
             ->orderBy('name')
             ->get();
 
+        $latestSales = Sale::with('user')
+            ->withCount('items')
+            ->latest()
+            ->limit(5)
+            ->get();
+
         $latestMovements = StockMovement::with(['product', 'user'])
             ->latest()
-            ->limit(8)
+            ->limit(6)
             ->get();
 
         return view('home', [
+            'salesMonthTotal'  => $salesMonthTotal,
+            'salesMonthCount'  => $salesMonthCount,
             'totalProducts'    => $totalProducts,
             'inventoryValue'   => $inventoryValue,
             'movementsToday'   => $movementsToday,
             'lowStockProducts' => $lowStockProducts,
+            'latestSales'      => $latestSales,
             'latestMovements'  => $latestMovements,
-            'week'             => $this->weekChart(),
+            'salesWeek'        => $this->salesChart(),
+            'week'             => $this->movementsChart(),
             'categoriesChart'  => $this->categoriesChart(),
         ]);
     }
 
+    // Ingresos (en euros) de cada uno de los últimos 7 días
+    private function salesChart(): array
+    {
+        $start = today()->subDays(6);
+
+        $sales = Sale::where('created_at', '>=', $start)
+            ->get(['total_cents', 'created_at'])
+            ->groupBy(fn (Sale $s) => $s->created_at->toDateString());
+
+        $labels = [];
+        $values = [];
+
+        for ($i = 0; $i < 7; $i++) {
+            $day = $start->copy()->addDays($i);
+            $items = $sales->get($day->toDateString(), collect());
+
+            $labels[] = $day->format('d/m');
+            $values[] = round($items->sum('total_cents') / 100, 2);
+        }
+
+        return compact('labels', 'values');
+    }
+
     // Unidades que entran y salen en cada uno de los últimos 7 días
-    private function weekChart(): array
+    private function movementsChart(): array
     {
         $start = today()->subDays(6);
 
@@ -81,10 +121,5 @@ class HomeController extends Controller
         }
 
         return compact('labels', 'values');
-    }
-
-    private function money(int $cents): string
-    {
-        return number_format($cents / 100, 2, ',', '.') . ' €';
     }
 }

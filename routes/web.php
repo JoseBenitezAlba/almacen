@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\SaleController;
 use App\Http\Controllers\StockMovementController;
 use Illuminate\Support\Facades\Route;
 
@@ -31,4 +32,5 @@ Route::middleware('auth')->group(function () {
     Route::get('/', HomeController::class)->name('home');
     Route::resource('products', ProductController::class)->only(['index', 'show']);
     Route::get('movements', [StockMovementController::class, 'index'])->name('movements.index');
+    Route::resource('sales', SaleController::class)->only(['index', 'create', 'store', 'show']);
 });
