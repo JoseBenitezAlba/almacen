@@ -9,11 +9,12 @@
             <p>Catálogo y existencias del almacén</p>
         </div>
 
+        <div class="actions">
+            <a class="btn btn-ghost" href="{{ route('products.lookup') }}">Localizar por código</a>
         @if (auth()->user()->isAdmin())
-            <div class="actions">
                 <a class="btn" href="{{ route('products.create') }}">+ Nuevo producto</a>
-            </div>
         @endif
+        </div>
     </div>
 
     <div class="card">
