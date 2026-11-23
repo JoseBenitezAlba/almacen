@@ -295,3 +295,12 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--brand); bor
     .content { padding: 20px 16px; }
     .grid-2 { grid-template-columns: 1fr; }
 }
+/* Localización por código: independiente de cámara o lector. */
+.code-lookup { max-width: 760px; }
+.code-lookup input { min-width: 0; }
+.code-lookup strong { overflow-wrap: anywhere; }
+.camera-section { border-top: 1px solid var(--border); padding-top: 20px; }
+.camera-section h2 { font-size: 1.05rem; margin-bottom: 8px; }
+#code-camera-video { display: block; width: 100%; max-height: 340px; background: #0f172a; border-radius: 9px; }
+[hidden] { display: none !important; }
+.btn:disabled { opacity: .55; cursor: default; }
