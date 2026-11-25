@@ -30,6 +30,7 @@ Route::middleware('auth')->group(function () {
 
     // Cualquier usuario con sesión
     Route::get('/', HomeController::class)->name('home');
+    Route::get('products/lookup', [\App\Http\Controllers\ProductLookupController::class, '__invoke'])->name('products.lookup');
     Route::resource('products', ProductController::class)->only(['index', 'show']);
     Route::get('movements', [StockMovementController::class, 'index'])->name('movements.index');
     Route::resource('sales', SaleController::class)->only(['index', 'create', 'store', 'show']);
